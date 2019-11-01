@@ -61,23 +61,40 @@ public class MyHashMap {
         return matchingEntry == null ? null : matchingEntry.value;
     }
 
-    public void remove(Object key) {
+    public Object remove(Object key) {
         int index = indexOf(key);
         MyEntry currentEntry = this.buckets[index];
+        MyEntry prevEntry = null;
 
-        while (currentEntry != null && currentEntry.next != null
-                && !matches(key, currentEntry.next.key)) {
+        while (currentEntry != null && currentEntry.next != null && !matches(key, currentEntry.key)) {
+            prevEntry = currentEntry;
             currentEntry = currentEntry.next;
         }
 
         if (currentEntry != null) {
             if (matches(key, currentEntry.key)) {
-                this.buckets[index] = null;
-                System.out.println();
-            } else if (currentEntry.next != null) {
-                currentEntry.next = currentEntry.next.next;
+                // предыдущего нет, следующих после текущего нет - в корзине 1 вхождение
+                if (prevEntry == null && currentEntry.next == null) {
+                    this.buckets[index] = null;
+                }
+                // предыдущего нет, следующие после текущего есть
+                else if (prevEntry == null) {
+                    this.buckets[index] = currentEntry.next;
+                }
+                // совпавший элемент в середине списка
+                else if (currentEntry.next != null){
+                    prevEntry.next = currentEntry.next;
+                }
+                // совпавший элемент - конец списка
+                else {
+                    prevEntry.next = null;
+                }
+                this.size--;
+                return currentEntry.value;
             }
-            this.size--;
+            return null;
+        } else {
+            return null;
         }
     }
 

@@ -1,5 +1,7 @@
 package stc21.exercise2;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class MyHashMapClient {
@@ -7,8 +9,10 @@ public class MyHashMapClient {
     private static MyHashMap myHashMap = new MyHashMap();
 
     public static void main(String[] args) {
-        testMyHashMap();
-        testPutOneHundredEntries();
+    //    testMyHashMap();
+    //    testPutOneHundredEntries();
+    //    testRemoveOneHundredEntries();
+        testPutAndRemoveObjects();
     }
 
     private static void testMyHashMap() {
@@ -76,9 +80,34 @@ public class MyHashMapClient {
 
     private static void testPutOneHundredEntries() {
         Random random = new Random();
-        for (int i = 0; i < 100; i++) {
-            myHashMap.put(random.nextInt(16), i);
+        for (int i = 0; i < 200; i++) {
+            myHashMap.put(String.valueOf(i), i);
         }
         System.out.println(myHashMap.toString());
+    }
+
+    private static void testRemoveOneHundredEntries() {
+        Random random = new Random();
+        for (int i = 0; i < 200; i++) {
+            myHashMap.remove(String.valueOf(i));
+        }
+        System.out.println(myHashMap.toString());
+    }
+
+    private static void testPutAndRemoveObjects() {
+        List<Object> objectList = new ArrayList<>();
+        for (int i = 0; i < 200; i++) {
+            objectList.add(new Object());
+        }
+        for (int i = 0; i < 200; i++) {
+            myHashMap.put(objectList.get(i), new Object());
+        }
+        System.out.println(myHashMap.toString());
+
+        for (int i = 0; i < 200; i++) {
+            myHashMap.remove(objectList.get(i));
+        }
+        System.out.println(myHashMap.toString());
+
     }
 }
