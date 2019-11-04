@@ -2,9 +2,29 @@ package stc21.exercise3;
 
 import java.util.*;
 
+/**
+ * @author Pavel Efimov
+ * Собственная реализация параметризованной HashMap из jdk.
+ * Класс MyGenericHashMap<K, V> реализует интерфейс Map<K, V>.
+ * Для совместимости с методами из интерфейса Map и тестов
+ * вложенный класс MyEntry<K, V> реализует интерфейс Map.Entry<K, V>.
+ *
+ * @throws ClassCastException
+ * */
+
 public class MyGenericHashMap<K, V> implements Map<K, V> {
 
-    private HashMap<Integer, Integer> map;
+    // поля необходимые для выбрасывания ClassCastException при попытке получить значение по
+    // недопустимому типу ключа, проверить наличие значения по недопустимому типу ключа,
+    // проверить наличие ключа по недопустимому типу значения
+    private final Class<K> keyClass;
+    private final Class<V> valueClass;
+
+    public MyGenericHashMap(Class<K> keyClass, Class<V> valueClass) {
+        this.keyClass = keyClass;
+        this.valueClass = valueClass;
+    }
+
     private static class MyEntry<K, V> implements Map.Entry<K, V>{
         private final K key;
         private V value;
@@ -53,12 +73,16 @@ public class MyGenericHashMap<K, V> implements Map<K, V> {
     }
 
     @Override
-    public boolean containsKey(Object key) {
+    public boolean containsKey(Object key) throws ClassCastException{
+        Class inputKeyClass = key.getClass();
+        if (inputKeyClass != keyClass) throw new ClassCastException();
         return getMatchingEntry(key) != null;
     }
 
     @Override
-    public boolean containsValue(Object value) {
+    public boolean containsValue(Object value) throws ClassCastException{
+        Class inputValueClass = value.getClass();
+        if (inputValueClass != valueClass) throw new ClassCastException();
         for (MyEntry<K, V> entry : this.buckets) {
             while (entry != null && !matches(value, entry.value)) {
                 entry = entry.next;
@@ -70,7 +94,9 @@ public class MyGenericHashMap<K, V> implements Map<K, V> {
     }
 
     @Override
-    public V get(Object key) {
+    public V get(Object key) throws ClassCastException {
+        Class inputKeyClass = key.getClass();
+        if (inputKeyClass != keyClass) throw new ClassCastException();
         MyEntry<K, V> matchingEntry = getMatchingEntry(key);
         return matchingEntry == null ? null : matchingEntry.value;
     }
@@ -81,7 +107,7 @@ public class MyGenericHashMap<K, V> implements Map<K, V> {
             this.resize();
         }
 
-        V oldValue = addEntry(new MyEntry<K, V>(key, value), this.buckets);
+        V oldValue = addEntry(new MyEntry<>(key, value), this.buckets);
         if (oldValue == null)
             this.size++;
         return oldValue;
@@ -102,7 +128,7 @@ public class MyGenericHashMap<K, V> implements Map<K, V> {
             if (this.shouldResize()) {
                 this.resize();
             }
-            V oldValue = addEntry(new MyEntry<K, V>(entryToPut.getKey(), entryToPut.getValue()), this.buckets);
+            V oldValue = addEntry(new MyEntry<>(entryToPut.getKey(), entryToPut.getValue()), this.buckets);
             if (oldValue == null)
                 this.size++;
         }

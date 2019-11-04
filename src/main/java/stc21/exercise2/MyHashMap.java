@@ -2,6 +2,14 @@ package stc21.exercise2;
 
 import java.util.Objects;
 
+/**
+ * @author Pavel Efimov
+ * Собственная реализация HashMap.
+ * В качестве корзин использует массив объектов статического вложенного класса MyEntry.
+ * В классе MyEntry используется тип Object для ключа и значения.
+
+ * */
+
 public class MyHashMap {
 
     private int size = 0;

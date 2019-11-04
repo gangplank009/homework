@@ -12,8 +12,10 @@ public class MyGenericHashMapClient {
     }
 
     public static void run() {
-        myGenericHashMap = new MyGenericHashMap<>();
-        secondGenericHashMap = new MyGenericHashMap<>();
+        myGenericHashMap = new MyGenericHashMap<>(String.class, String.class);
+        myGenericHashMap.put(null, "NULL");
+        String nullStr = myGenericHashMap.get(null);
+        secondGenericHashMap = new MyGenericHashMap<>(String.class, String.class);
         fillHashMap(myGenericHashMap, 10, 20);
         fillHashMap(secondGenericHashMap, 20, 30);
         System.out.println(myGenericHashMap.toString());
@@ -23,9 +25,6 @@ public class MyGenericHashMapClient {
 
     private static void fillHashMap(Map map,int startIndex, int stopIndex) {
         for (int i = startIndex; i < stopIndex; i++) {
-            if ( i % 10 == 0) {
-                System.out.println("Map size:" + map.size());
-            }
             String key = String.valueOf(i);
             String value = String.valueOf(i);
             map.put(key, value);
@@ -37,9 +36,6 @@ public class MyGenericHashMapClient {
     private static void removeMyHashMap() {
         Random random = new Random();
         for (int i = 0; i < 100; i++) {
-            if ( i % 10 == 0) {
-                System.out.println("Map size:" + myGenericHashMap.size());
-            }
             String key = String.valueOf(random.nextInt(64));
             String value = myGenericHashMap.remove(key);
             System.out.println("Remove from myHashMap: key=" + key + ", value=" + value);
