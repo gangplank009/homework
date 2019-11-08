@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MyHttpSocketServer {
+
     public static void main(String[] args) throws IOException {
         final int serverPort = 8090;
         final ServerSocket serverSocket = new ServerSocket(serverPort);
@@ -18,10 +19,11 @@ public class MyHttpSocketServer {
         while (true) {
             try (Socket clientSocket = serverSocket.accept()) {
                 System.out.println("Client connected");
-
                 String httpResponse;
+
                 // на GET запросы возвращаем список файлов и каталогов рабочей директории(каталог проекта)
                 // на все остальные возвращаем код 404 Not Found
+
                 if (isGetRequest(clientSocket))
                     httpResponse = buildPositiveResponse();
                 else
@@ -37,13 +39,16 @@ public class MyHttpSocketServer {
         InputStreamReader isr = new InputStreamReader(clientSocket.getInputStream());
         BufferedReader reader = new BufferedReader(isr);
         String line = reader.readLine();
-        while (!line.isEmpty()) {
-            request.add(line);
-            line = reader.readLine();
-        }
-        for (String requestLine : request) {
-            if (requestLine.contains("GET") && requestLine.contains("HTTP/1.1")) {
-                return true;
+        if (line != null) {
+            while (!line.isEmpty()) {
+                request.add(line);
+                System.out.println(line);
+                line = reader.readLine();
+            }
+            for (String requestLine : request) {
+                if (requestLine.contains("GET") && requestLine.contains("HTTP/1.1")) {
+                    return true;
+                }
             }
         }
         return false;
@@ -53,21 +58,33 @@ public class MyHttpSocketServer {
         File currentDir = new File(System.getProperty("user.dir"));
         File[] filesAndDirectories = currentDir.listFiles();
 
-        StringBuilder httpResponse = new StringBuilder("HTTP/1.1 200 OK\r\n\r\n");
-        httpResponse.append("Current directory:")
-                    .append(currentDir)
-                    .append("Files and catalogs:\n");
-
+        // построение заголовка и контента для запроса GET
+        StringBuilder httpResponse = new StringBuilder("HTTP/1.1 200 OK\r\n");
+        httpResponse.append("Content-Type: text/html\r\n\r\n")
+                .append("<html>\n")
+                .append("<body>\n")
+                .append("<p>Current directory:</p>\n")
+                .append("<p>").append(currentDir).append("</p>\n")
+                .append("<p>Files and catalogs:</p>\n");
+        // заполнение параграфов файлами и директориями
         if (filesAndDirectories != null) {
             for (File file : filesAndDirectories)
-                httpResponse.append("\t")
-                        .append(file)
-                        .append("\n");
+                httpResponse.append("<p>").append(file).append("</p>\n");
         }
+        // добавление тегов конца контента
+        httpResponse.append("</body>\n")
+                .append("<html>\n");
+
         return httpResponse.toString();
     }
 
     private static String buildNegativeResponse() {
-        return "HTTP/1.1 404 Not Found\r\n\r\n";
+        return "HTTP/1.1 404 Not Found\r\n" +
+                "Content-Type: text/html\r\n\r\n" +
+                "<html>\n" +
+                "<body>\n" +
+                "<b>404 Not Found</b>\n" +
+                "</body>\n" +
+                "<html>\n";
     }
 }
