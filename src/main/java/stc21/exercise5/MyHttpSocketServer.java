@@ -21,10 +21,22 @@ public class MyHttpSocketServer {
                 System.out.println("Client connected");
                 String httpResponse;
 
+                List<String> request = new ArrayList<>();
+                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+                String line = in.readLine();
+                if (line != null) {
+                    while (!line.isEmpty()) {
+                        request.add(line);
+                        System.out.println(line);
+                        line = in.readLine();
+                    }
+                }
+
                 // на GET запросы возвращаем список файлов и каталогов рабочей директории(каталог проекта)
                 // на все остальные возвращаем код 404 Not Found
 
-                if (isGetRequest(clientSocket))
+                if (isGetRequest(request))
                     httpResponse = buildPositiveResponse();
                 else
                     httpResponse = buildNegativeResponse();
@@ -34,21 +46,10 @@ public class MyHttpSocketServer {
         }
     }
 
-    private static boolean isGetRequest(Socket clientSocket) throws IOException {
-        List<String> request = new ArrayList<>();
-        InputStreamReader isr = new InputStreamReader(clientSocket.getInputStream());
-        BufferedReader reader = new BufferedReader(isr);
-        String line = reader.readLine();
-        if (line != null) {
-            while (!line.isEmpty()) {
-                request.add(line);
-                System.out.println(line);
-                line = reader.readLine();
-            }
-            for (String requestLine : request) {
-                if (requestLine.contains("GET") && requestLine.contains("HTTP/1.1")) {
-                    return true;
-                }
+    private static boolean isGetRequest(List<String> request) {
+        for (String requestLine : request) {
+            if (requestLine.contains("GET") && requestLine.contains("HTTP/1.1")) {
+                return true;
             }
         }
         return false;
