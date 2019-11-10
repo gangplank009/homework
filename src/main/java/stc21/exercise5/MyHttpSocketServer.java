@@ -10,10 +10,24 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Pavel Efimov
+ *
+ * Класс MyHttpSocketServer всю логику работы содержит в методе main():
+ * 1) Создает ServerSocket, который слушает порт 8090 и в бесконечном цикле ждет подключения от клиента.
+ * 2) Через InputStream сокета клиента читает запрос.
+ * 3) Определяет его тип с помощью функции isGetRequest(List<String> request).
+ * 4) Возвращает ответ со списком директорий проекта(buildPositiveResponse()) или ошибку (buildNegativeResponse())
+ * 5) Записывает ответ в OutputStream сокета клиента.
+ *
+ * */
+
 public class MyHttpSocketServer {
 
+    private static final int serverPort = 8090;
+
     public static void main(String[] args) throws IOException {
-        final int serverPort = 8090;
+
         final ServerSocket serverSocket = new ServerSocket(serverPort);
         System.out.printf("Listening for connection on port %d ...\n", serverPort);
         while (true) {
@@ -46,6 +60,7 @@ public class MyHttpSocketServer {
         }
     }
 
+    // По первой строке входного запроса определяет какой тип и протокол использовался
     private static boolean isGetRequest(List<String> request) {
         for (String requestLine : request) {
             if (requestLine.contains("GET") && requestLine.contains("HTTP/1.1")) {
@@ -55,6 +70,9 @@ public class MyHttpSocketServer {
         return false;
     }
 
+    // Возвращает строку с HTTP-заголовком(200 ОК) и телом в виде html-документа,
+    // содержащим список всех папок директории проекта.
+    // Вызывается при GET запросе
     private static String buildPositiveResponse() {
         File currentDir = new File(System.getProperty("user.dir"));
         File[] filesAndDirectories = currentDir.listFiles();
@@ -79,6 +97,9 @@ public class MyHttpSocketServer {
         return httpResponse.toString();
     }
 
+    // возвращает строку с HTTP-заголовком(404 Not Found) и телом в виде html-документа,
+    // содержащим код ответа и сообщение об ошибке.
+    // Вызывается при всех запросах, кроме GET
     private static String buildNegativeResponse() {
         return "HTTP/1.1 404 Not Found\r\n" +
                 "Content-Type: text/html\r\n\r\n" +
