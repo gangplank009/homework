@@ -1,9 +1,6 @@
 package stc21.exercise5;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -33,39 +30,33 @@ public class MyHttpSocketServer {
         while (true) {
             try (Socket clientSocket = serverSocket.accept()) {
                 System.out.println("Client connected");
-                String httpResponse;
-
-                List<String> request = new ArrayList<>();
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                OutputStream out = clientSocket.getOutputStream();
 
-                String line = in.readLine();
-                if (line != null) {
-                    while (!line.isEmpty()) {
-                        request.add(line);
-                        System.out.println(line);
-                        line = in.readLine();
-                    }
-                }
+                StringBuilder requestBuilder = new StringBuilder();
+
+                int ch;
+                while ((ch = in.read()) != '\0' && ch != -1)
+                    requestBuilder.append((char) ch);
 
                 // на GET запросы возвращаем список файлов и каталогов рабочей директории(каталог проекта)
                 // на все остальные возвращаем код 404 Not Found
-
-                if (isGetRequest(request))
+                String httpResponse;
+                if (isGetRequest(requestBuilder.toString()))
                     httpResponse = buildPositiveResponse();
                 else
                     httpResponse = buildNegativeResponse();
 
-                clientSocket.getOutputStream().write(httpResponse.getBytes(StandardCharsets.UTF_8));
+                httpResponse = httpResponse + '\0';
+                out.write(httpResponse.getBytes());
             }
         }
     }
 
     // По первой строке входного запроса определяет какой тип и протокол использовался
-    private static boolean isGetRequest(List<String> request) {
-        for (String requestLine : request) {
-            if (requestLine.contains("GET") && requestLine.contains("HTTP/1.1")) {
-                return true;
-            }
+    private static boolean isGetRequest(String request) {
+        if (request.contains("GET") && request.contains("HTTP/1.1")) {
+            return true;
         }
         return false;
     }
@@ -73,7 +64,7 @@ public class MyHttpSocketServer {
     // Возвращает строку с HTTP-заголовком(200 ОК) и телом в виде html-документа,
     // содержащим список всех папок директории проекта.
     // Вызывается при GET запросе
-    private static String buildPositiveResponse() {
+    public static String buildPositiveResponse() {
         File currentDir = new File(System.getProperty("user.dir"));
         File[] filesAndDirectories = currentDir.listFiles();
 
@@ -100,7 +91,7 @@ public class MyHttpSocketServer {
     // возвращает строку с HTTP-заголовком(404 Not Found) и телом в виде html-документа,
     // содержащим код ответа и сообщение об ошибке.
     // Вызывается при всех запросах, кроме GET
-    private static String buildNegativeResponse() {
+    public static String buildNegativeResponse() {
         return "HTTP/1.1 404 Not Found\r\n" +
                 "Content-Type: text/html\r\n\r\n" +
                 "<html>\n" +
