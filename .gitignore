@@ -1,3 +1,4 @@
 /target/
 /.idea/
 *.iml
+/exercise7/target/
