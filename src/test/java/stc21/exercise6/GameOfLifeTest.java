@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 public class GameOfLifeTest {
 
     private static GameOfLife game;
-    private static int stepCount = 10000;
+    private static int stepCount = 10;
     private static long executionTime;
 
     @BeforeClass
@@ -21,6 +21,7 @@ public class GameOfLifeTest {
 
     @Before
     public void readStartStateFile() {
+    //    game.generateStartFileInput(100);
         game.readStartStateFile();
     }
 

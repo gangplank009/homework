@@ -3,6 +3,7 @@ package stc21.exercise6;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.*;
 
 /**
@@ -34,6 +35,23 @@ public class GameOfLife {
         this.startStateFile = currentDir + "\\src\\main\\java\\stc21\\exercise6\\" + startStateFile;
         this.stopStateFile = currentDir + "\\src\\main\\java\\stc21\\exercise6\\" + stopStateFile;
         this.steps = steps;
+    }
+
+    // метод для генерации поля заданной стороны
+    public void generateStartFileInput(int sideSize) {
+        if (startStateFile == null)
+            return;
+        // сгенерировали поле в start.txt
+        Random randomGen = new Random();
+        try (FileOutputStream fos = new FileOutputStream(startStateFile, false)) {
+            for (int y = 0; y < sideSize; y++) {
+                for (int x = 0; x < sideSize; x++)
+                    fos.write(randomGen.nextBoolean() ? '#' : '.');
+                fos.write(new byte[]{'\r', '\n'});
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void readStartStateFile() {
